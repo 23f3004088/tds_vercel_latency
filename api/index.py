@@ -6,7 +6,6 @@ from pathlib import Path
 
 app = FastAPI()
 
-# Enable CORS for all origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,25 +13,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load telemetry data once
 data_path = Path(__file__).parent.parent / "q-vercel-latency.json"
 
 with open(data_path) as f:
     telemetry = json.load(f)
 
-@app.post("/api/latency")
+@app.post("/")
 async def analyze(request: Request):
     body = await request.json()
-    regions = body.get("regions", [])
-    threshold = body.get("threshold_ms", 180)
+    regions = body["regions"]
+    threshold = body["threshold_ms"]
 
     results = {}
 
     for region in regions:
         region_data = [r for r in telemetry if r["region"] == region]
-
-        if not region_data:
-            continue
 
         latencies = [r["latency_ms"] for r in region_data]
         uptimes = [r["uptime"] for r in region_data]
