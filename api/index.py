@@ -36,7 +36,7 @@ class RegionMetrics(BaseModel):
     avg_uptime: float
     breaches: int
 
-@app.post("/")
+@app.post("/api")
 def analyze(payload: AnalysisRequest):
     results = {}
     
