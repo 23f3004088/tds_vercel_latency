@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
@@ -11,8 +12,10 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["POST"],
+    allow_credentials=False,
+    allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 data_path = Path(__file__).parent.parent / "telemetry.json"
@@ -61,3 +64,13 @@ def analyze(payload: AnalysisRequest):
         }
 
     return results
+
+@app.exception_handler(Exception)
+async def all_exception_handler(request: Request, exc: Exception):
+    status_code = exc.status_code if hasattr(exc, 'status_code') else 500
+    detail = exc.detail if hasattr(exc, 'detail') else str(exc)
+    return JSONResponse(
+        status_code=status_code,
+        content={"detail": detail},
+        headers={"Access-Control-Allow-Origin": "*"}
+    )
