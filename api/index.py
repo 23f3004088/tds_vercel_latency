@@ -22,6 +22,7 @@ data_path = Path(__file__).parent.parent / "telemetry.json"
 
 with open(data_path) as f:
     telemetry_data = json.load(f)
+    print(telemetry_data)
 
 class AnalysisRequest(BaseModel):
     regions: List[str]
