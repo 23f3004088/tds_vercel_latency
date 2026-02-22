@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
@@ -11,13 +12,15 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
 
+
 with open("telemetry.json", "r") as f:
     telemetry_data = json.load(f)
+    print(telemetry_data)
 
 class AnalysisRequest(BaseModel):
     regions: List[str]
@@ -57,6 +60,16 @@ def analyze(payload: AnalysisRequest):
 def root():
     return {"message": "Analytics API is running"}
 
-# For Vercel serverless function
-from mangum import Mangum
-handler = Mangum(app)
+
+@app.exception_handler(Exception)
+async def all_exception_handler(request: Request, exc: Exception):
+    status_code = exc.status_code if hasattr(exc, 'status_code') else 500
+    detail = exc.detail if hasattr(exc, 'detail') else str(exc)
+    return JSONResponse(
+        status_code=status_code,
+        content={"detail": detail},
+        headers={"Access-Control-Allow-Origin": "*"}
+    )
+# # For Vercel serverless function
+# from mangum import Mangum
+# handler = Mangum(app)
