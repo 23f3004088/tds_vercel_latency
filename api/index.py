@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import List
 import json
 import statistics
+import uvicorn  # Add this import
 
 app = FastAPI()
 
@@ -73,3 +74,7 @@ async def all_exception_handler(request: Request, exc: Exception):
 # # For Vercel serverless function
 # from mangum import Mangum
 # handler = Mangum(app)
+
+# Add this at the bottom to run on port 8005
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8005)
